@@ -1,7 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { missionAdded } from './postsSlice';
+import { missionAdded } from './MissionSlice';
+function gethour(){
+  const date = new Date();
+  const hour = date.getHours();
+  console.log(hour);
+  if(hour<13){
+    alert("בוקר טוב");
+    console.log('dadada')
+  } else if(hour>=13 && hour<=17){
+    alert('צהריים טובים');
+  }else{
+    alert('ערב טוב');
+  }
+}
+
 
 export const AddMissionForm = () => {
   const [title, setTitle] = useState('');
@@ -14,10 +28,13 @@ export const AddMissionForm = () => {
   const onTitleChanged = (e) => setTitle(e.target.value);
   const onContentChanged = (e) => setContent(e.target.value);
   const onAuthorChanged = (e) => setUserId(e.target.value);
-
+  useEffect(()=>{
+    gethour();
+  },[])
   const onSaveMissionClicked = () => {
     if (title && content) {
-      dispatch(missionAdded(title, content, userId))
+      dispatch(missionAdded(title, content, userId));
+      console.log('hi');
       setTitle('');
       setContent('');
       setUserId('');
@@ -25,7 +42,7 @@ export const AddMissionForm = () => {
   }
 
   const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
-
+  
   return (
     <section>
       <h2>Add a new Mission</h2>
@@ -35,7 +52,7 @@ export const AddMissionForm = () => {
           type="text"
           id="postTitle"
           name="postTitle"
-          placeholder="What's on your mind?"
+          placeholder=""
           value={title}
           onChange={onTitleChanged}
         />

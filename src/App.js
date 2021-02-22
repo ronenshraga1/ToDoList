@@ -8,10 +8,10 @@ import {
 
 import { Navbar } from './app/Navbar'
 
-import { MissionsList } from './features/posts/PostsList'
-import { AddMissionForm } from './features/posts/AddPostForm'
-import { EditPostForm } from './features/posts/EditPostForm'
-import { SinglePostPage } from './features/posts/SinglePostPage'
+import { MissionsList } from './features/posts/MissionList'
+import { AddMissionForm } from './features/posts/AddMissionForm'
+import { EditPostForm } from './features/posts/EditMissionForm'
+import { SinglePostPage } from './features/posts/SingleMissionPage'
 
 function App() {
   return (

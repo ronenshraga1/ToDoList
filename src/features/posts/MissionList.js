@@ -13,7 +13,7 @@ import FavoriteBorder from '@material-ui/icons/FavoriteBorder';
 
 
 import { TimeAgo } from './TimeAgo'
-import { deleteMission } from './postsSlice'
+import { deleteMission,missionAdded } from './MissionSlice'
 let  CHANGE =0;
 let FILTER =0;
 let FILTERON = false;
@@ -28,29 +28,71 @@ const GreenCheckbox = withStyles({
 function CheckboxLabels() {
   
 }
+
 let renderedMissions =[];
 export const MissionsList = () => {
   const dispatch = useDispatch();
   const[update,SetUpdate] = useState(0);
   const[updatedelete,SetUpdateDelete] = useState(0);
+  const[missions1,Setmiss] = useState({missarr:[]});
   const [state, setState] = React.useState({
     checkedG: false,
   });
   const[search,SetSearch] = useState('');
-
-
-  const handleChange = (event) => {
-    setState({ ...state, [event.target.name]: event.target.checked });
-  };
-
-  const missions = useSelector((state) => state.missions)
-  const del = (event) =>{
-    dispatch(deleteMission(event.target.id));
-    FILTER++;
-    SetUpdateDelete(FILTER);
+  const getmission = async() =>{
+    try{
+      const response = await fetch('http://localhost:4002/addmission',{
+        method:'GET',
+        headers: {
+          'Content-Type': 'application/json'
+      },
+      });
+      if(response.ok){
+        const jsonResponse = await response.json();
+        console.log(jsonResponse.js);
+        Setmiss({missarr:jsonResponse.js});
+      }else{
+      throw new Error('request failed');
+    }
+    }catch(error){
+      console.log(error);
+    }
   }
+  const deletemission = async (event) =>{
+    try{
+      const response = await fetch('http://localhost:4002/deletemission',{
+        method:'POST',
+        headers: {
+          'Content-Type': 'application/json'
+      },
+        body:JSON.stringify({id:event.target.id})
+      });
+      console.log(response.ok);
+      if(response.ok){
+        const jsonResponse = await response.json();
+        if(jsonResponse.msg==='deleted'){
+          CHANGE++;
+          SetUpdateDelete(CHANGE);
+          console.log(updatedelete);
+        } else{
+          console.log('failed');
+        }
+      }else{
+      throw new Error('request failed');
+    }
+    }catch(error){
+      console.log(error);
+    }
+  }
+  
+  const missions = useSelector((state) => state.missions)
   useEffect(()=>{
-     renderedMissions = missions.map((mission) => {
+    getmission();
+  },[missions])
+
+  useEffect(()=>{
+    getmission();
+     renderedMissions = missions1.missarr.map((mission) => {
       return (
         <article className="post-excerpt" key={mission.id}>
           <h3>{mission.title}</h3>
@@ -62,17 +104,17 @@ export const MissionsList = () => {
           <Link to={`/missions/${mission.id}`} className="button muted-button">
             View Post
           </Link>
-          <button id={mission.id} onClick={del}>Delete</button>
-          <FormControlLabel
-        control={<GreenCheckbox checked={state.checkedG} onChange={handleChange} name="checkedG" />}
-        label="Custom color"
+          <button id={mission.id} onClick={deletemission}>Delete</button>
+          <Checkbox
+        color="primary"
+        inputProps={{ 'aria-label': 'secondary checkbox' }}
       />
         </article>
       )
     })
   },[updatedelete]);
   // Sort posts in reverse chronological order by datetime string
-  const orderedMissions = missions
+  const orderedMissions = missions1.missarr
     .slice()
     .sort((a, b) => b.date.localeCompare(a.date))
   if(FILTERON === false){
@@ -81,7 +123,7 @@ export const MissionsList = () => {
       <article className="post-excerpt" key={mission.id}>
         <h3>{mission.title}</h3>
         <div>
-          <p>User:{mission.user}</p>
+          <p>User:{mission.username}</p>
           <TimeAgo timestamp={mission.date} />
         </div>
         <p className="post-content">{mission.content.substring(0, 100)}</p>
@@ -89,22 +131,22 @@ export const MissionsList = () => {
         <Link to={`/missions/${mission.id}`} className="button muted-button">
           View Mission
         </Link>
-        <button className="delbutton" id={mission.id} onClick={del}>Delete</button>
-        <FormControlLabel
-        control={<GreenCheckbox checked={state.checkedG} onChange={handleChange} name="checkedG" />}
-        label="finish"
+        <button className="delbutton" id={mission.id} onClick={deletemission}>Delete</button>
+        <Checkbox
+        color="primary"
+        inputProps={{ 'aria-label': 'secondary checkbox' }}
       />
       </article>
     );
   })
 } else{
-  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1);
+  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
   renderedMissions = filterMissions.map((mission) =>{
     return (
       <article className="post-excerpt" key={mission.id}>
         <h3>{mission.title}</h3>
         <div>
-          <p>User:{mission.user}</p>
+          <p>User:{mission.username}</p>
           <TimeAgo timestamp={mission.date} />
         </div>
         <p className="post-content">{mission.content.substring(0, 100)}</p>
@@ -112,24 +154,23 @@ export const MissionsList = () => {
         <Link to={`/missions/${mission.id}`} className="button muted-button">
           View Mission
         </Link>
-        <button className="delbutton" id={mission.id} onClick={del}>Delete</button>
-        <FormControlLabel
-        control={<GreenCheckbox checked={state.checkedG} onChange={handleChange} name="checkedG" />}
-        label="finish"
+        <button className="delbutton" id={mission.id} onClick={deletemission}>Delete</button>
+        <Checkbox
+        color="primary"
+        inputProps={{ 'aria-label': 'secondary checkbox' }}
       />
       </article>
     );
   })
 }
 useEffect(()=>{
-  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1);
-      console.log('check');
+  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
   renderedMissions = filterMissions.map((mission) =>{
     return (
       <article className="post-excerpt" key={mission.id}>
         <h3>{mission.title}</h3>
         <div>
-          <p>User:{mission.user}</p>
+          <p>User:{mission.username}</p>
           <TimeAgo timestamp={mission.date} />
         </div>
         <p className="post-content">{mission.content.substring(0, 100)}</p>
@@ -137,10 +178,10 @@ useEffect(()=>{
         <Link to={`/missions/${mission.id}`} className="button muted-button">
           View Mission
         </Link>
-        <button className="delbutton" id={mission.id} onClick={del}>Delete</button>
-        <FormControlLabel
-        control={<GreenCheckbox checked={state.checkedG} onChange={handleChange} name="checkedG" />}
-        label="finish"
+        <button className="delbutton" id={mission.id} onClick={deletemission}>Delete</button>
+        <Checkbox
+        color="primary"
+        inputProps={{ 'aria-label': 'secondary checkbox' }}
       />
       </article>
     );
@@ -151,7 +192,7 @@ useEffect(()=>{
   const searchMissions =(e) =>{
     if(e.which === 13){
       console.log('press');
-      const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1);
+      const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
       console.log(filterMissions);
       FILTER++;
       FILTERON = true;
@@ -166,16 +207,18 @@ const Reset =() =>{
   return (
     <section className="posts-list">
       <h2>Missions</h2>
+      <div className="search">
       <input
           type="text"
           id="search"
           name="search"
-          placeholder=""
+          placeholder="filter missions by title and content"
           value={search}
           onChange={onUpdateSearch}
           onKeyPress={searchMissions}
         />
         <button type="button" onClick={Reset}>Reset</button>
+        </div>
       {renderedMissions}
     </section>
   )

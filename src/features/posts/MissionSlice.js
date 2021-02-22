@@ -3,24 +3,47 @@ import { sub } from 'date-fns'
 
 const initialState = [
   
-]
+];
+let COUNT =0;
+async function sendmission(payload){
+  console.log(payload.date);
+  try{
+    const response = await fetch('http://localhost:4002/addmission',{
+      method:'POST',
+      headers: {
+        'Content-Type': 'application/json'
+    },
+      body:JSON.stringify({id:payload.id,date:payload.date,title:payload.title,content:payload.content,user:payload.username})
+    });
+    if(response.ok){
+      const jsonResponse = await response.json();
+      console.log(jsonResponse.js);
+    }else{
+    throw new Error('request failed');
+  }
+  }catch(error){
+    console.log(error);
+  }
+}
 
 const missionsSlice = createSlice({
   name: 'missions',
   initialState,
   reducers: {
     missionAdded: {
-      reducer(state, action) {
+        reducer(state, action) {
+        sendmission(action.payload);
         state.push(action.payload);
+        console.log(state);
       },
-      prepare(title, content, userId) {
+       prepare(title, content, userId) {
         return {
           payload: {
             id: nanoid(),
             date: new Date().toISOString(),
             title:title,
             content:content,
-            user: userId,
+            username: userId,
             submissions:['1','2']
           },
         }
@@ -59,7 +82,7 @@ const missionsSlice = createSlice({
       const sub = addmission.submissions.slice();
       sub.splice(parseInt(id),1);
       addmission.submissions = sub;
-    }
+    },
   },
 })
 
