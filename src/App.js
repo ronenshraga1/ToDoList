@@ -12,6 +12,9 @@ import { MissionsList } from './features/posts/MissionList'
 import { AddMissionForm } from './features/posts/AddMissionForm'
 import { EditPostForm } from './features/posts/EditMissionForm'
 import { SinglePostPage } from './features/posts/SingleMissionPage'
+import {Login} from './features/posts/Login';
+import { Register } from './features/posts/Register';
+
 
 function App() {
   return (
@@ -19,9 +22,19 @@ function App() {
       <Navbar />
       <div className="App">
         <Switch>
-          <Route
+        <Route
             exact
             path="/"
+            component={Login}
+          />
+           <Route
+            exact
+            path="/register"
+            component={Register}
+          />
+          <Route
+            exact
+            path="/missions"
             render={() => (
               <React.Fragment>
                 <AddMissionForm />

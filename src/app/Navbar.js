@@ -3,6 +3,12 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 export const Navbar = () => {
+  const logout=()=>{
+    localStorage.setItem('username','');
+    localStorage.setItem('password','');
+    localStorage.setItem('authenticated','false');
+    localStorage.setItem('role','');
+  }
   return (
     <nav>
       <section>
@@ -10,7 +16,8 @@ export const Navbar = () => {
 
         <div className="navContent">
           <div className="navLinks">
-            <Link to="/">Missions</Link>
+            <Link to="/missions">Missions</Link>
+            <Link to="/login" onClick={logout}>Logout</Link>
           </div>
         </div>
       </section>

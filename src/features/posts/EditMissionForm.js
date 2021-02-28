@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
 import { missionUpdated } from './MissionSlice'
-
+let RESPONSE ='cccc';
 export const EditPostForm = ({ match }) => {
   const { missionId } = match.params
   const[mission1,SetMission] = useState({missionget:null});
@@ -18,21 +18,23 @@ export const EditPostForm = ({ match }) => {
         headers: {
           'Content-Type': 'application/json'
       },
-        body:JSON.stringify({id:missionId})
+        body:JSON.stringify({id:missionId,auth:localStorage.getItem('authenticated')})
       });
       console.log(response.ok);
       if(response.ok){
         const jsonResponse = await response.json();
-        if(jsonResponse.msg==='didnt found'){
+        if(jsonResponse.msg==='no access' || jsonResponse.msg === 'didnt found'){
           //do soemthing
+          RESPONSE = jsonResponse.msg;
           console.log('fail');
+          SetChange(2);
         } else{
           console.log('success');
           console.log(jsonResponse.result[0]);
+          RESPONSE = jsonResponse.result;
           SetMission({missionget:jsonResponse.result[0]});
           setTitle(jsonResponse.result[0].title);
           setContent(jsonResponse.result[0].content);
-          console.log(mission1);
         }
       }else{
       throw new Error('request failed');
@@ -63,7 +65,6 @@ export const EditPostForm = ({ match }) => {
     }
   }
   useEffect(()=>{
-    console.log('check');
     getmission();
   },[])
   
@@ -82,7 +83,8 @@ export const EditPostForm = ({ match }) => {
       history.push(`/missions/${missionId}`)
     }
   }
-  console.log('check');
+  console.log(RESPONSE);
+  if(localStorage.getItem('authenticated') === 'true'){
   return (
     <section>
       <h2>Edit Post</h2>
@@ -109,4 +111,11 @@ export const EditPostForm = ({ match }) => {
       </button>
     </section>
   )
+  } else{
+    return(
+      <section>
+        <h1>No access</h1>
+      </section>
+    )
+  }
 }

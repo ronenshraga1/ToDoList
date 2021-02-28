@@ -33,7 +33,7 @@ export const AddMissionForm = () => {
   },[])
   const onSaveMissionClicked = () => {
     if (title && content) {
-      dispatch(missionAdded(title, content, userId));
+      dispatch(missionAdded(title, content, localStorage.getItem('username')));
       console.log('hi');
       setTitle('');
       setContent('');
@@ -41,7 +41,7 @@ export const AddMissionForm = () => {
     }
   }
 
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
+  const canSave = Boolean(title) && Boolean(content);
   
   return (
     <section>
@@ -56,15 +56,7 @@ export const AddMissionForm = () => {
           value={title}
           onChange={onTitleChanged}
         />
-        <label htmlFor="postAuthor">Author:</label>
-        <input
-          type="text"
-          id="postAuthor"
-          name="postAuthor"
-          placeholder=""
-          value={userId}
-          onChange={onAuthorChanged}
-        />
+        
         <label htmlFor="postContent">Content:</label>
         <textarea
           id="postContent"

@@ -26,7 +26,7 @@ export const SinglePostPage = ({ match }) => {
         headers: {
           'Content-Type': 'application/json'
       },
-        body:JSON.stringify({id:missionId})
+        body:JSON.stringify({id:missionId,auth:localStorage.getItem('authenticated')})
       });
       console.log(response.ok);
       if(response.ok){
@@ -126,11 +126,11 @@ export const SinglePostPage = ({ match }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     renderSubMissions = submissions.submissionsarray.map((submis,i=0) =>{
       return(
-        <div className="sublist">
+        <article className="sublist">
         <h4 id={i}>{submis}</h4>
         <button className="delsubutton" id={submissions.ids[i]} onClick={deletesub}>Delete</button>
         {i++}
-        </div>
+        </article>
       ); 
       
     })
@@ -148,11 +148,11 @@ export const SinglePostPage = ({ match }) => {
       console.log(submissions.submissionsarray)
        renderSubMissions = submissions.submissionsarray.map((submis,i=0) =>{
         return(
-          <div className="sublist">
+          <article className="sublist">
           <h4 id={i}>{submis}</h4>
           <button className="delsubutton" id={submissions.ids[i]} onClick={deletesub}>Delete</button>
           {i++}
-          </div>
+          </article>
         ); 
         
       })
@@ -166,16 +166,17 @@ export const SinglePostPage = ({ match }) => {
   }
    renderSubMissions = submissions.submissionsarray.map((submis,i=0) =>{
     return(
-      <div className="sublist">
+      <article className="sublist">
       <h4 id={i}>{submis}</h4>
+      <br></br>
       <button className="delsubutton" id={submissions.ids[i]} onClick={deletesub}>Delete</button>
       {i++}
-      </div>
+      </article>
     ); 
     
   })
   console.log(mission1.missionget);
-  if (mission1.missionget === null || mission1.missionget.length === 0) {
+  if (mission1.missionget === null || mission1.missionget === undefined) {
     console.log('do');
     return (
       <section>

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { useSelector,useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import { useSelector,useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { green } from '@material-ui/core/colors';
 import FormGroup from '@material-ui/core/FormGroup';
@@ -40,12 +40,14 @@ export const MissionsList = () => {
   });
   const[search,SetSearch] = useState('');
   const getmission = async() =>{
+    console.log(localStorage.getItem('role'));
     try{
-      const response = await fetch('http://localhost:4002/addmission',{
-        method:'GET',
+      const response = await fetch('http://localhost:4002/getmissions',{
+        method:'POST',
         headers: {
           'Content-Type': 'application/json'
       },
+      body:JSON.stringify({username:localStorage.getItem('username'),role:localStorage.getItem('role'),auth:localStorage.getItem('authenticated')})
       });
       if(response.ok){
         const jsonResponse = await response.json();
@@ -140,7 +142,7 @@ export const MissionsList = () => {
     );
   })
 } else{
-  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
+  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1 || mission.username.indexOf(search) !==-1);
   renderedMissions = filterMissions.map((mission) =>{
     return (
       <article className="post-excerpt" key={mission.id}>
@@ -164,7 +166,7 @@ export const MissionsList = () => {
   })
 }
 useEffect(()=>{
-  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
+  const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1 || mission.username.indexOf(search) !==-1);
   renderedMissions = filterMissions.map((mission) =>{
     return (
       <article className="post-excerpt" key={mission.id}>
@@ -192,7 +194,7 @@ useEffect(()=>{
   const searchMissions =(e) =>{
     if(e.which === 13){
       console.log('press');
-      const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1);
+      const filterMissions = orderedMissions.filter(mission => mission.title.indexOf(search) !==-1 || mission.content.indexOf(search) !==-1|| mission.username.indexOf(search) !==-1);
       console.log(filterMissions);
       FILTER++;
       FILTERON = true;
@@ -203,6 +205,7 @@ const Reset =() =>{
   FILTERON = false;
   FILTER++;
   SetUpdateDelete(FILTER);
+  SetSearch('');
 }
   return (
     <section className="posts-list">

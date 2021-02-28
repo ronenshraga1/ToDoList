@@ -156,8 +156,8 @@ p.post-content {
   color: white;
   border-radius: 4px;
   padding: 1px;
-  margin: 0 0 1.2rem 0;
-  font-size: 1rem;
+  margin: 0 0 0.1rem 0;
+  font-size: 1.7rem;
 }
 h4{
   margin-top: 5px;
@@ -180,8 +180,11 @@ button.reaction-button {
   justify-content: space-between;
 }
 .sublist{
-  display: flex;
+  padding: 0.25rem 0.25rem;
+  border: 1px solid rgb(177, 174, 174);
+  border-radius: 7px; 
 }
+
 
 /* https://projects.lukehaas.me/css-loaders/ , Loader #3 */
 
