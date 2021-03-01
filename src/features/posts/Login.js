@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import React from 'react';
 import { useHistory,Link } from 'react-router-dom';
 let CryptoJS = require("crypto-js");
+const dotenv = require('dotenv');
 
 
 export const Login=()=>{
@@ -13,13 +14,15 @@ export const Login=()=>{
     const OnUserNameChange =(e) => SetUserName(e.target.value);
     const OnPasswordChange =(e) => SetPassword(e.target.value);
     const SendRequest = async() =>{
+      dotenv.config();
+      console.log(process.env.REACT_APP_KEY_ENCRYPT)
         try{
             const response = await fetch('http://localhost:4002/login',{
               method:'POST',
               headers: {
                 'Content-Type': 'application/json'
             },
-              body:JSON.stringify({username:username,password:CryptoJS.AES.encrypt(password, 'agsfarfsbfggfsajrsrj1').toString()})
+              body:JSON.stringify({username:username,password:CryptoJS.AES.encrypt(password, process.env.REACT_APP_KEY_ENCRYPT).toString()})
             });
             if(response.ok){
               const jsonResponse = await response.json();
@@ -55,7 +58,7 @@ export const Login=()=>{
               headers: {
                 'Content-Type': 'application/json'
             },
-              body:JSON.stringify({username:localStorage.getItem('username'),password:CryptoJS.AES.encrypt(localStorage.getItem('password'), 'agsfarfsbfggfsajrsrj1').toString()})
+              body:JSON.stringify({username:localStorage.getItem('username'),password:CryptoJS.AES.encrypt(localStorage.getItem('password'), process.env.REACT_APP_KEY_ENCRYPT).toString()})
             });
             if(response.ok){
               const jsonResponse = await response.json();

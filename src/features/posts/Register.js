@@ -19,7 +19,7 @@ export const Register=()=>{
               headers: {
                 'Content-Type': 'application/json'
             },
-              body:JSON.stringify({username:username,password:CryptoJS.AES.encrypt(password, 'agsfarfsbfggfsajrsrj1').toString()})
+              body:JSON.stringify({username:username,password:CryptoJS.AES.encrypt(password, process.env.REACT_APP_KEY_ENCRYPT).toString()})
             });
             console.log(response.ok);
             if(response.ok){
