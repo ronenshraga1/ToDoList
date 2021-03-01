@@ -1,6 +1,10 @@
 const express = require('express');
+const cookieSession = require("cookie-session");
+const cookieParser = require("cookie-parser");
 const app = express();
+const passport = require('passport')
 const port = 4002;
+const session = require("express-session");
 const Pool = require('pg').Pool;
 const pool = new Pool({
   user: 'postgres',
@@ -9,6 +13,10 @@ const pool = new Pool({
   password: 'postgres',
   port: 5432,
 })
+require('./passportConfigure')(passport,pool);
+const SESSION = {
+    COOKIE_KEY: "thisappisawesome"
+  };
 let cors = require('cors');
 let bodyParser = require('body-parser')
 app.use(express.json());
@@ -19,10 +27,64 @@ const corsOptions = {
     credentials: true,               
     allowedHeaders: "Content-Type, Authorization, X-Requested-With, Accept",
   }
-  app.options('*', cors(corsOptions))
-  app.use(cors(corsOptions));
-  
+app.options('*', cors(corsOptions))
+app.use(cors(corsOptions));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(
+    cookieSession({
+      name: "session",
+      keys: [SESSION.COOKIE_KEY],
+      maxAge: 24 * 60 * 60 * 100
+    })
+  );
+  app.post('/register',(req,res)=>{
+      pool.query('INSERT INTO users(username,password) VALUES($1,$2)',[req.body.username,req.body.password],(error,results)=>{
+          if(error){
+              console.log(error);
+              res.json({msg:'username already exists'})
+          } else{
+              res.json({msg:'new user created'});
+          }
+      })
+  })
 
+  app.post('/login',
+  passport.authenticate('local'),
+  function(req, res) {
+      console.log(req.user.fail);
+    if(req.user.fail === 'failed'){
+        res.redirect('/login1');
+    }else{
+    console.log('success');
+    res.redirect('/missions/'+req.user.role);
+    }
+  });
+
+
+  
+  // if it's already login, send the profile response,
+  // otherwise, send a 401 response that the user is not authenticated
+  // authCheck before navigating to home page
+  app.get("/login1", (req, res) => {
+      console.log('fail');
+    res.status(201).json({
+      authenticated: false,
+      message: "failed to login",
+      user: req.user,
+      role:req.role,
+      cookies: req.cookies
+    });
+  });
+  app.get("/missions/:role",(req, res) => {
+    res.status(200).json({
+      authenticated: true,
+      message: "user successfully authenticated",
+      user: req.username,
+      role:req.params.role,
+      cookies: req.cookies
+    });
+  });
 
 app.post('/addmission', (req, res) => {
   pool.query('INSERT INTO missions(id,date,title,content,username) VALUES($1,$2,$3,$4,$5)',[req.body.id,req.body.date,req.body.title,req.body.content,req.body.user],(error,results)=>{
@@ -39,15 +101,37 @@ app.post('/addmission', (req, res) => {
   });
   
 });
-app.get('/addmission', (req, res) => {
-  pool.query('SELECT * FROM missions',[],(error,results)=>{
+app.post('/getmissions', (req, res) => {
+    console.log(req.body.role);
+  if(req.body.role ==='admin' && req.body.auth){
+    pool.query('SELECT * FROM missions',[],(error,results)=>{
+        if(error){
+            console.log(error);
+            res.send({js:'failed to send'});
+        } else{
+            res.send({js:results.rows});
+        }
+      });
+  }else if(req.body.auth){
+  pool.query('SELECT * FROM missions WHERE username=$1',[req.body.username],(error,results)=>{
     if(error){
+        console.log(error);
         res.send({js:'failed to send'});
     } else{
         res.send({js:results.rows});
     }
   });
+} else{
+    res.send({js:'failed to send'});
+}
+});
+
   app.post('/deletemission',(req,res)=>{
+      pool.query('DELETE FROM submissions WHERE mission_id=$1',[req.body.id],(error,results)=>{
+          if(error){
+              res.send({msg:'fail'});
+          }
+      })
     pool.query('DELETE FROM missions WHERE id=$1',[req.body.id],(error,results)=>{
         if(error){
             res.send({msg:'didnt found'});
@@ -57,16 +141,22 @@ app.get('/addmission', (req, res) => {
     });
   });
   app.post('/getspecificmission',(req,res)=>{
-    pool.query('SELECT * FROM missions WHERE id=$1',[req.body.id],(error,results)=>{
-        if(error){
-            res.send({msg:'didnt found'});
-        } else{
-            res.send({result:results.rows});
-        }
-    });
+      console.log(req.body.auth);
+      if(req.body.auth === 'true'){
+          console.log(req.body.auth);
+        pool.query('SELECT * FROM missions WHERE id=$1',[req.body.id],(error,results)=>{
+            if(error){
+                res.send({msg:'didnt found'});
+            } else{
+                res.send({result:results.rows});
+            }
+        });
+    }else{
+        res.send({msg:'no access'});
+    }
   });
   
-});
+
 app.post('/updatemission',(req,res) =>{
     pool.query('UPDATE missions SET title =$1,content =$2 WHERE id=$3',[req.body.title,req.body.content,req.body.id],(error,results)=>{
         if(error){
@@ -110,6 +200,7 @@ app.post('/deletesubmission',(req,res)=>{
             console.log(error);
             res.send({msg:'didnt found'});
         }else{
+            console.log(results.rows);
             res.send({msg:'deleted'});
         }
     });
